@@ -33,13 +33,10 @@ while True:
     print(f"3. non_speaking_duration: {r.non_speaking_duration}")
     print("\nListening in the background. Speak a few commands to test.")
     
-    # Start listening in the background
     stop_listening = r.listen_in_background(m, callback)
     
-    # Test period
     input("Press Enter when you are ready to provide feedback...")
     
-    # Stop listening
     if stop_listening:
         stop_listening(wait_for_stop=False)
         
@@ -52,7 +49,6 @@ while True:
         # To keep listening with final settings, we can start it one last time
         print("\nNow listening with the final optimized settings...")
         r.listen_in_background(m, callback)
-        # Keep the script running
         import time
         while True:
             time.sleep(0.1)

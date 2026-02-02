@@ -1,4 +1,3 @@
-import ctypes
 import time
 import speech_recognition as sr
 import os
@@ -8,6 +7,7 @@ import helpers.mistral as mistral
 import helpers.avatar as avatar
 import helpers.win32 as win32
 import helpers.spotify as spotify
+import helpers.sound as sound
 
 
 # DEFINE COMMANDS HERE
@@ -36,7 +36,7 @@ COMMANDS = {
     ("open", "steam"): lambda command: os.system("start steam"),
     ("close", "steam"): lambda command: os.system("taskkill /f /im Steam.exe"),
     
-    # GOTOs (A bit buggy if using with Komorebic)
+    # GOTOs 
     ("go", "to", "chrome"): lambda command: win32.make_window_active("Google Chrome"),
     ("go", "to", "notepad"): lambda command: win32.make_window_active("Notepad"),
     ("go", "to", "code"): lambda command: win32.make_window_active("Visual Studio Code"),
@@ -48,23 +48,24 @@ COMMANDS = {
     ("google",): lambda command: os.system(rf'start "" "https://www.google.com/search?q={command}"') if not command == "google" and command.startswith("google") else None,
 
     # SPOTIFY 
-    ("play", "music"): lambda command: spotify.play_pause(),
-    ("pause", "music"): lambda command: spotify.play_pause(),
-    ("stop", "music"): lambda command: spotify.play_pause(),
+    # ("play", "music"): lambda command: spotify.play_pause(),
+    # ("pause", "music"): lambda command: spotify.play_pause(),
+    # ("stop", "music"): lambda command: spotify.play_pause(),
     ("next", "song"): lambda command: spotify.next_track(),
     ("skip", "song"): lambda command: spotify.next_track(),
     ("previous", "song"): lambda command: spotify.previous_track(),
     ("last", "song"): lambda command: spotify.previous_track(),
-    ("volume", "up"): lambda command: spotify.volume_up(),
-    ("volume", "down"): lambda command: spotify.volume_down(),
-    ("mute", "music"): lambda command: spotify.mute(),
     ("spotify","play", "by"): lambda command: spotify.play_artist_song(command.split("by ")[1].strip(), command.split("play ")[1].split(" by ")[0].strip()),
     ("spotify","play",): lambda command: spotify.play_artist(command.replace("play ", "")),
     ("clear", "q"): lambda command: spotify.clear_queue(),
     
-    # AUDIO
-    ("play",): lambda command: spotify.play_pause(),
-    ("pause",): lambda command: spotify.play_pause(),
+    # SOUND
+    ("play",): lambda command: sound.play_pause(),
+    ("pause",): lambda command: sound.play_pause(),
+    ("volume", "up"): lambda command: sound.volume_up(),
+    ("volume", "down"): lambda command: sound.volume_down(),
+    ("mute", "music"): lambda command: sound.mute(),
+    ("mute"): lambda command: sound.mute(),
 
     # MISTRAL
     ("question",): lambda command: mistral.call_mistral_with_question(command), 
