@@ -1,6 +1,4 @@
 import os
-
-
 import requests
 import random
 from dotenv import load_dotenv
@@ -14,7 +12,6 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 QUEUED_TRACKS = []
 
-# Import OAuth helper for user-specific operations
 try:
     from .spotify_oauth import get_valid_access_token
 except ImportError:

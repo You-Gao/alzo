@@ -1,11 +1,11 @@
 
 import win32gui
 import win32con
-import subprocess
-import os
+import threading
+
+# NEED TO REFACTOR WOW THIS IS BAD
 
 def make_window_active(window_name):
-    # First, print all active windows for debugging
     def enum_windows_callback(hwnd, windows):
         if win32gui.IsWindowVisible(hwnd) and win32gui.IsWindowEnabled(hwnd):
             windows.append(win32gui.GetWindowText(hwnd))
@@ -34,18 +34,6 @@ def make_window_active(window_name):
         print(f"Found window: {window_title}")
         
         try:
-            result = subprocess.run(['komorebic', 'query', 'focused-window'], 
-                                  capture_output=True, text=True, timeout=2)
-            if result.returncode == 0:
-                print("Komorebi detected, trying komorebi focus...")
-                subprocess.run(['komorebic', 'focus-window', str(hwnd)], 
-                             capture_output=True, timeout=2)
-                print(f"Focused window via Komorebi: {window_title}")
-                return
-        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
-            print("Komorebi not available or failed, using standard Windows API...")
-        
-        try:
             # Simple approach that works better with tiling window managers
             win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
             win32gui.BringWindowToTop(hwnd)
@@ -66,6 +54,9 @@ def make_window_active(window_name):
                 print(f"All methods failed: {e2}")
     else:
         print(f"Window containing '{window_name}' not found.")
-
-if __name__ == "__main__":
-    make_window_active("Google Chrome")
+        
+def make_message_box(message):
+    threading.Thread(
+        target=lambda: win32gui.MessageBox(None, message, "alzo", 0),
+        daemon=True
+    ).start()

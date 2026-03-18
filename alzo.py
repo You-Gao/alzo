@@ -1,17 +1,21 @@
-import time
 import speech_recognition as sr
 import os
+import time
+from dotenv import load_dotenv
 import keyboard
 
 import helpers.mistral as mistral
-import helpers.avatar as avatar
 import helpers.win32 as win32
 import helpers.spotify as spotify
 import helpers.sound as sound
+import helpers.agent as agent
 
+from langchain.agents import create_agent
+from langchain_mistralai import ChatMistralAI
+load_dotenv()
 
-# DEFINE COMMANDS HERE
 COMMANDS = {
+    # MISC
     ("hate", "game"): lambda command: keyboard.send('alt+f4'),
     ("clip", "that"): lambda command: print("Making a clip..."),
     
@@ -72,11 +76,11 @@ COMMANDS = {
     ("open", "chat"): lambda command: mistral.call_mistral_with_question(command), 
 }
 
-COMMAND = "" 
+# Tools are just fed in as model input, try removing tools and seeing prompt tokens.
+MISTRAL = ChatMistralAI(model="mistral-small-2503", temperature=.7)
+AGENT = create_agent(model = MISTRAL, tools=agent.TOOLS, system_prompt="Identify the correct tools to call to fulfill the user request! If there is no response just complete without calling another tool. No formatting the text response.")
 
 def action(command):
-    global COMMAND
-    COMMAND = command  # Store command globally for main loop
     for keywords, func in COMMANDS.items():
         command_words = command.split()
         contains_all = all((word in command_words for word in keywords))
@@ -84,14 +88,15 @@ def action(command):
             print(f"Executing command: {keywords}")
             func(command)
             return
+    if len(command_words) > 5: # Don't want this running for random pick-ups
+        result = AGENT.invoke({"messages": [{"role": "user", "content": f"{command}"}]}) 
+        win32.make_message_box(result['messages'][-1].content)
     return
 
 def callback(recognizer, audio):
-    global COMMAND
     try:
         command = recognizer.recognize_google(audio).lower()
-        COMMAND = command  # Update global command
-        print(COMMAND)
+        print(command)
         action(command)
     except sr.UnknownValueError:
         pass
@@ -109,29 +114,4 @@ r.non_speaking_duration = .5                # Minimum silence duration to split 
 with m as source: r.adjust_for_ambient_noise(source)
 r.listen_in_background(m, callback)
 
-# MAIN LOOP to UPDATE AVATAR ANIMATION AND RESPOND TO COMMANDS
-last_animation = None
-while True:
-    if any(word in COMMAND for word in ["what", "who", "where", "when", "why", "how"]):
-        if last_animation != "thinking":
-            avatar.start_gui_thread("thinking")
-            last_animation = "thinking"
-    elif "open" in COMMAND or "close" in COMMAND:
-        if last_animation != "active":
-            avatar.start_gui_thread("active")
-            last_animation = "active"
-    elif "thanks" in COMMAND:
-        if last_animation != "happy":
-            avatar.start_gui_thread("happy")
-            last_animation = "happy"
-    elif any(word in COMMAND for word in ["hate", "close"]):
-        if last_animation != "angry":
-            avatar.start_gui_thread("angry")
-            last_animation = "angry"
-    else:
-        if last_animation != "idle":
-            avatar.start_gui_thread("idle")
-            last_animation = "idle"
-
-    time.sleep(1) 
-    
+while True: time.sleep(2^32-1)

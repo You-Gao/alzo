@@ -10,11 +10,8 @@ def callback(recognizer, audio):
     except sr.RequestError as e:
         pass
     
-# INITIALIZE RECOGNITION
 r = sr.Recognizer()
 m = sr.Microphone()
-
-# Default settings
 r.pause_threshold = 0.5
 r.phrase_threshold = 0.2
 r.non_speaking_duration = 0.5

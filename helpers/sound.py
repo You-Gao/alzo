@@ -1,6 +1,5 @@
 import time
 import ctypes
-from ctypes import wintypes
 
 # VIRTUAL KEY CODES
 VK_MEDIA_PLAY_PAUSE = 0xB3
@@ -9,7 +8,6 @@ VK_MEDIA_PREV_TRACK = 0xB1
 VK_VOLUME_UP = 0xAF
 VK_VOLUME_DOWN = 0xAE
 VK_VOLUME_MUTE = 0xAD
-
 KEYEVENTF_KEYUP = 0x0002
 
 def send_key(vk_code):
