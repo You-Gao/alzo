@@ -65,11 +65,11 @@ COMMANDS = {
     # ("clear", "q"): lambda command: spotify.clear_queue(),
     
     # SOUND
-    ("play",): lambda command: sound.play_pause(),
-    ("pause",): lambda command: sound.play_pause(),
+    ("play","sound"): lambda command: sound.play_pause(),
+    ("pause","sound"): lambda command: sound.play_pause(),
     ("volume", "up"): lambda command: sound.volume_up(),
     ("volume", "down"): lambda command: sound.volume_down(),
-    ("mute", "music"): lambda command: sound.mute(),
+    ("mute", "sound"): lambda command: sound.mute(),
     ("mute",): lambda command: sound.mute(),
 
     # MISTRAL
@@ -80,10 +80,7 @@ COMMANDS = {
 # Tools are just fed in as model input, try removing tools and seeing prompt tokens.
 print("Setting Up Agent")
 MISTRAL = ChatMistralAI(model="mistral-small-2503", temperature=.7)
-SYSTEM_PROMPT = """
-If the user is not asking a question or issuing a command, reply with the word Nothing.
-Don't use text formatting when responding.
-"""
+SYSTEM_PROMPT = """You are a helpful AI assistant meant to answer questions and call tools as a desktop assistant."""
 AGENT = create_agent(model = MISTRAL, tools=agent.TOOLS, system_prompt=SYSTEM_PROMPT)
 print("Agent Set-up!")
 
@@ -95,10 +92,10 @@ def action(command):
             print(f"Executing command: {keywords}")
             func(command)
             return
-    if len(command_words) > 5: # Don't want this running for random pick-ups
+    if len(command_words) >= 5: # Don't want this running for random pick-ups
         result = AGENT.invoke({"messages": [{"role": "user", "content": f"{command}"}]})
         if result['messages'][-1].content.replace(".","") != "Nothing":
-            tk.make_message_box(result['messages'][-1].content)
+            tk.make_message_box(result['messages'][-1].content.replace("*",""))
     return
 
 def callback(recognizer, audio):
