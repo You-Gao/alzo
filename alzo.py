@@ -6,6 +6,7 @@ import keyboard
 
 import helpers.mistral as mistral
 import helpers.win32 as win32
+import helpers.tk as tk
 import helpers.spotify as spotify
 import helpers.sound as sound
 import helpers.agent as agent
@@ -97,7 +98,7 @@ def action(command):
     if len(command_words) > 5: # Don't want this running for random pick-ups
         result = AGENT.invoke({"messages": [{"role": "user", "content": f"{command}"}]})
         if result['messages'][-1].content.replace(".","") != "Nothing":
-            win32.make_message_box(result['messages'][-1].content)
+            tk.make_message_box(result['messages'][-1].content)
     return
 
 def callback(recognizer, audio):
@@ -115,7 +116,7 @@ r = sr.Recognizer()
 m = sr.Microphone()
 
 r.pause_threshold = .75                      # How long to wait before considering speech ended
-r.phrase_threshold = .25                   # Minimum audio length to consider as speech
+r.phrase_threshold = .5                   # Minimum audio length to consider as speech
 r.non_speaking_duration = .5                # Minimum silence duration to split phrases
 
 print("Adjusted to Ambient Noise")
