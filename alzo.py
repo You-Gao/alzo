@@ -51,17 +51,17 @@ COMMANDS = {
     # GOOGLE CHROME
     ("google",): lambda command: os.system(rf'start "" "https://www.google.com/search?q={command}"') if not command == "google" and command.startswith("google") else None,
 
-    # SPOTIFY 
+    # SPOTIFY (Requires Premium) 
     # ("play", "music"): lambda command: spotify.play_pause(),
     # ("pause", "music"): lambda command: spotify.play_pause(),
     # ("stop", "music"): lambda command: spotify.play_pause(),
-    ("next", "song"): lambda command: spotify.next_track(),
-    ("skip", "song"): lambda command: spotify.next_track(),
-    ("previous", "song"): lambda command: spotify.previous_track(),
-    ("last", "song"): lambda command: spotify.previous_track(),
-    ("spotify","play", "by"): lambda command: spotify.play_artist_song(command.split("by ")[1].strip(), command.split("play ")[1].split(" by ")[0].strip()),
-    ("spotify","play",): lambda command: spotify.play_artist(command.replace("play ", "")),
-    ("clear", "q"): lambda command: spotify.clear_queue(),
+    # ("next", "song"): lambda command: spotify.next_track(),
+    # ("skip", "song"): lambda command: spotify.next_track(),
+    # ("previous", "song"): lambda command: spotify.previous_track(),
+    # ("last", "song"): lambda command: spotify.previous_track(),
+    # ("spotify","play", "by"): lambda command: spotify.play_artist_song(command.split("by ")[1].strip(), command.split("play ")[1].split(" by ")[0].strip()),
+    # ("spotify","play",): lambda command: spotify.play_artist(command.replace("play ", "")),
+    # ("clear", "q"): lambda command: spotify.clear_queue(),
     
     # SOUND
     ("play",): lambda command: sound.play_pause(),
@@ -69,20 +69,25 @@ COMMANDS = {
     ("volume", "up"): lambda command: sound.volume_up(),
     ("volume", "down"): lambda command: sound.volume_down(),
     ("mute", "music"): lambda command: sound.mute(),
-    ("mute"): lambda command: sound.mute(),
+    ("mute",): lambda command: sound.mute(),
 
     # MISTRAL
-    ("question",): lambda command: mistral.call_mistral_with_question(command), 
+    # ("question",): lambda command: mistral.call_mistral_with_question(command), 
     ("open", "chat"): lambda command: mistral.call_mistral_with_question(command), 
 }
 
 # Tools are just fed in as model input, try removing tools and seeing prompt tokens.
 MISTRAL = ChatMistralAI(model="mistral-small-2503", temperature=.7)
-AGENT = create_agent(model = MISTRAL, tools=agent.TOOLS, system_prompt="Identify the correct tools to call to fulfill the user request! If there is no response just complete without calling another tool. No formatting the text response.")
+SYSTEM_PROMPT = """
+Don't be conversational.
+If there is no response or the user doesn't issue a command reply with nothing.
+Do not use formatting like "**" in the response.
+"""
+AGENT = create_agent(model = MISTRAL, tools=agent.TOOLS, system_prompt=SYSTEM_PROMPT)
 
 def action(command):
     for keywords, func in COMMANDS.items():
-        command_words = command.split()
+        command_words = command.replace(".","").split()
         contains_all = all((word in command_words for word in keywords))
         if contains_all:
             print(f"Executing command: {keywords}")
@@ -95,7 +100,7 @@ def action(command):
 
 def callback(recognizer, audio):
     try:
-        command = recognizer.recognize_google(audio).lower()
+        command = recognizer.recognize_whisper(audio).lower()
         print(command)
         action(command)
     except sr.UnknownValueError:
@@ -107,11 +112,11 @@ def callback(recognizer, audio):
 r = sr.Recognizer()
 m = sr.Microphone()
 
-r.pause_threshold = .5                      # How long to wait before considering speech ended
-r.phrase_threshold = .1                     # Minimum audio length to consider as speech
-r.non_speaking_duration = .5                # Minimum silence duration to split phrases
+r.pause_threshold = 1                      # How long to wait before considering speech ended
+r.phrase_threshold = .25                   # Minimum audio length to consider as speech
+r.non_speaking_duration = 1                # Minimum silence duration to split phrases
 
-with m as source: r.adjust_for_ambient_noise(source)
+with m as source: r.adjust_for_ambient_noise(source, duration=5)
 r.listen_in_background(m, callback)
 
 while True: time.sleep(2^32-1)

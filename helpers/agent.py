@@ -25,7 +25,7 @@ def weekly_meetings() -> str:
     return [(event.start,
              event.end,
              event.summary,
-             event.description,
+             event.description.replace("*",""),
              event.duration,
              event.attendees,
              event.location,
