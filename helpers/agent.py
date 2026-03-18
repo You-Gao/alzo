@@ -7,7 +7,10 @@ import arrow
 
 @tool
 def weekly_meetings() -> str:
-    """Fetches and displays the meetings a user has given the current week"""
+    """
+    Fetches and displays the meetings a user has given the current week.
+    Only for when the user asks about meetings or events.
+    """
     GOOGLE = os.getenv("GOOGLE_ICS_LINK")
     OUTLOOK = os.getenv("OUTLOOK_ICS_LINK")
     print("Fetching .ics files")

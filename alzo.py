@@ -77,13 +77,14 @@ COMMANDS = {
 }
 
 # Tools are just fed in as model input, try removing tools and seeing prompt tokens.
+print("Setting Up Agent")
 MISTRAL = ChatMistralAI(model="mistral-small-2503", temperature=.7)
 SYSTEM_PROMPT = """
-Don't be conversational.
-If there is no response or the user doesn't issue a command reply with nothing.
-Do not use formatting like "**" in the response.
+If the user is not asking a question or issuing a command, reply with the word Nothing.
+Don't use text formatting when responding.
 """
 AGENT = create_agent(model = MISTRAL, tools=agent.TOOLS, system_prompt=SYSTEM_PROMPT)
+print("Agent Set-up!")
 
 def action(command):
     for keywords, func in COMMANDS.items():
@@ -94,8 +95,9 @@ def action(command):
             func(command)
             return
     if len(command_words) > 5: # Don't want this running for random pick-ups
-        result = AGENT.invoke({"messages": [{"role": "user", "content": f"{command}"}]}) 
-        win32.make_message_box(result['messages'][-1].content)
+        result = AGENT.invoke({"messages": [{"role": "user", "content": f"{command}"}]})
+        if result['messages'][-1].content.replace(".","") != "Nothing":
+            win32.make_message_box(result['messages'][-1].content)
     return
 
 def callback(recognizer, audio):
@@ -112,11 +114,13 @@ def callback(recognizer, audio):
 r = sr.Recognizer()
 m = sr.Microphone()
 
-r.pause_threshold = 1                      # How long to wait before considering speech ended
+r.pause_threshold = .75                      # How long to wait before considering speech ended
 r.phrase_threshold = .25                   # Minimum audio length to consider as speech
-r.non_speaking_duration = 1                # Minimum silence duration to split phrases
+r.non_speaking_duration = .5                # Minimum silence duration to split phrases
 
+print("Adjusted to Ambient Noise")
 with m as source: r.adjust_for_ambient_noise(source, duration=5)
 r.listen_in_background(m, callback)
+print("Set-up Complete!")
 
 while True: time.sleep(2^32-1)
