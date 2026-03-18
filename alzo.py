@@ -3,6 +3,7 @@ import os
 import time
 from dotenv import load_dotenv
 import keyboard
+from playsound import playsound
 
 import helpers.mistral as mistral
 import helpers.win32 as win32
@@ -21,9 +22,9 @@ COMMANDS = {
     ("clip", "that"): lambda command: print("Making a clip..."),
     
     # WINDOWS
-    ("lock", "pc"): lambda command: os.system("rundll32.exe user32.dll,LockWorkStation"),
-    ("shut", "down", "pc"): lambda command: os.system("shutdown /s /t 1"),
-    ("restart", "pc"): lambda command: os.system("shutdown /r /t 1"),
+    ("lock", "computer"): lambda command: os.system("rundll32.exe user32.dll,LockWorkStation"),
+    ("shut", "down", "computer"): lambda command: os.system("shutdown /s /t 1"),
+    ("restart", "compute"): lambda command: os.system("shutdown /r /t 1"),
     
     # OPEN/CLOSE COMMANDS
     ("open", "chrome"): lambda command: os.system("start chrome"),
@@ -84,6 +85,7 @@ SYSTEM_PROMPT = """You are a helpful AI assistant meant to answer questions and 
 AGENT = create_agent(model = MISTRAL, tools=agent.TOOLS, system_prompt=SYSTEM_PROMPT)
 print("Agent Set-up!")
 
+
 def action(command):
     for keywords, func in COMMANDS.items():
         command_words = command.replace(".","").split()
@@ -98,27 +100,26 @@ def action(command):
             tk.make_message_box(result['messages'][-1].content.replace("*",""))
     return
 
-def callback(recognizer, audio):
-    try:
-        command = recognizer.recognize_whisper(audio).lower()
-        print(command)
-        action(command)
-    except sr.UnknownValueError:
-        pass
-    except sr.RequestError as e:
-        pass
-
 # INITIALIZE RECOGNITION
 r = sr.Recognizer()
 m = sr.Microphone()
 
-r.pause_threshold = .75                      # How long to wait before considering speech ended
-r.phrase_threshold = .5                   # Minimum audio length to consider as speech
-r.non_speaking_duration = .5                # Minimum silence duration to split phrases
+r.pause_threshold = .5                      # How long to wait before considering speech ended
+r.phrase_threshold = .3                     # Minimum audio length to consider as speech
 
-print("Adjusted to Ambient Noise")
-with m as source: r.adjust_for_ambient_noise(source, duration=5)
-r.listen_in_background(m, callback)
-print("Set-up Complete!")
+print("Adjusting to Ambient Noise")
+with m as source: r.adjust_for_ambient_noise(source, duration=3)
 
-while True: time.sleep(2^32-1)
+while True:
+    with m as source:
+        print("Listening for Activation")
+        audio = r.record(source, duration=2)
+        word = r.recognize_whisper(audio).lower().strip().replace(".","")
+        print(word)
+        if word == "activate":
+            playsound(os.path.abspath('activated.mp3'))
+            print("Listening for Command")
+            audio = r.record(source, duration=5)
+            command = r.recognize_whisper(audio).lower()
+            print(command)
+            action(command)

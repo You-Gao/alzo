@@ -8,7 +8,7 @@ def make_message_box(message):
         root.attributes("-topmost", True)
         root.resizable(False, False)
 
-        label = tk.Label(root, text=message, padx=20, pady=20, justify="left", wraplength=1000, anchor="center") #wrap is kind of magic, but max-width of your monitor
+        label = tk.Label(root, text=message, padx=20, pady=20, justify="left", wraplength=750, anchor="center") #wrap is kind of magic, but max-width of your monitor
         label.pack()
         
         x,y = get_middle(root)

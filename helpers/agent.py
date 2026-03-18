@@ -9,7 +9,8 @@ import arrow
 def weekly_meetings() -> str:
     """
     Fetches and displays the meetings a user has given the current week.
-    Only for when the user asks about meetings or events.
+    Respond with "Here are your meetings for the week:"
+    Common synonyms: meanings
     """
     GOOGLE = os.getenv("GOOGLE_ICS_LINK")
     OUTLOOK = os.getenv("OUTLOOK_ICS_LINK")

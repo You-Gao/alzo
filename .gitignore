@@ -1,4 +1,4 @@
 .ENV
-gifs/
 __pycache__/
+model/
 spotify_tokens.txt
