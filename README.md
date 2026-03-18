@@ -6,4 +6,8 @@ This idea started from a voice-activated dashcam (https://www.youtube.com/watch?
 
 ## Tools
 
+### Meetings
+* Pulls from Google and Outlook .ics files inked by ````OUTLOOK_ICS_LINK```` & ````GOOGLE_ICS_LINK````.
+* Returns parsed events from the *icalendar* library and feeds back into the model.
+
 ## Personal Use?
